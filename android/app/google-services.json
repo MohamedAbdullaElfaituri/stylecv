@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "9473051446",
+    "project_id": "style-cv",
+    "storage_bucket": "style-cv.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:9473051446:android:b878c76858356381d48197",
+        "android_client_info": {
+          "package_name": "com.example.stylecv"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3uAZfxMtQCyWd24mDxcBCDf5iSbD_RxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

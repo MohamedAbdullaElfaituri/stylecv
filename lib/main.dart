@@ -5,9 +5,13 @@ import 'package:stylecv/public/views/home_secreen.dart';
 import 'package:stylecv/public/views/login_screen.dart';
 import 'package:stylecv/public/views/signup_screen.dart';
 
+import 'db/firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();  // Firebase başlatılıyor
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );  // Firebase başlatılıyor
   runApp(const MyApp());
 }
 

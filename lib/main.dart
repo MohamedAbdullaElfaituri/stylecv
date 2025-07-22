@@ -1,40 +1,37 @@
-import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:stylecv/public/views/home_secreen.dart';
-
+import 'package:flutter/material.dart';
+import 'package:stylecv/public/controlls/profile_check.dart';
 import 'package:stylecv/public/views/login_screen.dart';
-import 'package:stylecv/public/views/signup_screen.dart';
-
-import 'db/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );  // Firebase başlatılıyor
-  runApp(const MyApp());
+  await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'CV Builder',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: AuthWrapper(),
       debugShowCheckedModeBanner: false,
-      title: 'StyliCV',
-      theme: ThemeData(
-        primaryColor: const Color(0xff142831),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: const Color(0xff1a936f),
-        ),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const LoginScreen(),
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/signup': (context) => const SignUpScreen(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        return snapshot.hasData ? ProfileCheckScreen(uid: snapshot.data!.uid) : LoginScreen();
       },
     );
   }

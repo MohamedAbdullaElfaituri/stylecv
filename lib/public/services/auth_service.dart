@@ -16,11 +16,9 @@ class AuthService {
       : GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Convert Firebase User to our UserModel
   UserModel? _userFromFirebase(User? user) {
     if (user == null) return null;
 
-    // Split display name into name and surname
     String name = '';
     String surname = '';
     if (user.displayName != null) {
@@ -39,17 +37,14 @@ class AuthService {
     );
   }
 
-  // Stream of user changes
   Stream<UserModel?> get user {
     return _auth.authStateChanges().asyncMap((user) async {
       if (user == null) return null;
 
-      // Get additional user data from Firestore
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (doc.exists) {
         return UserModel.fromMap(doc.data()!);
       } else {
-        // If no document exists, create one from Firebase auth data
         final userModel = _userFromFirebase(user);
         if (userModel != null) {
           await _createUserDocument(userModel.copyWith(
@@ -62,7 +57,6 @@ class AuthService {
     });
   }
 
-  // Email & Password Sign Up
   Future<AuthResponse> signUpWithEmail({
     required String name,
     required String surname,
@@ -75,11 +69,9 @@ class AuthService {
         password: password,
       );
 
-      // Update user profile with name
       await credential.user!.updateDisplayName('$name $surname');
       await credential.user!.reload();
 
-      // Create user document in Firestore
       final userModel = UserModel(
         id: credential.user!.uid,
         name: name,
@@ -95,12 +87,11 @@ class AuthService {
       return AuthResponse(user: userModel);
     } on FirebaseAuthException catch (e) {
       return AuthResponse(error: getErrorMessage(e));
-    } catch (e) {
+    } catch (_) {
       return AuthResponse(error: 'An unexpected error occurred. Please try again.');
     }
   }
 
-  // Email & Password Login
   Future<AuthResponse> loginWithEmail({
     required String email,
     required String password,
@@ -111,57 +102,49 @@ class AuthService {
         password: password,
       );
 
-      // Update last login time
-      await _firestore.collection('users').doc(credential.user!.uid).update({
-        'lastLogin': DateTime.now().toIso8601String(),
-      });
+      final userRef = _firestore.collection('users').doc(credential.user!.uid);
+      final doc = await userRef.get();
 
-      // Get user data from Firestore
-      final userDoc = await _firestore.collection('users').doc(credential.user!.uid).get();
-      final userModel = userDoc.exists
-          ? UserModel.fromMap(userDoc.data()!)
-          : _userFromFirebase(credential.user!);
+      final now = DateTime.now();
 
-      // If no document exists, create one
-      if (!userDoc.exists && userModel != null) {
-        await _createUserDocument(userModel.copyWith(
-          createdAt: DateTime.now(),
-          lastLogin: DateTime.now(),
-        ));
+      if (doc.exists) {
+        await userRef.update({'lastLogin': now.toIso8601String()});
+        return AuthResponse(user: UserModel.fromMap(doc.data()!));
+      } else {
+        final userModel = _userFromFirebase(credential.user!);
+        if (userModel != null) {
+          await _createUserDocument(userModel.copyWith(
+            createdAt: now,
+            lastLogin: now,
+          ));
+        }
+        return AuthResponse(user: userModel);
       }
-
-      return AuthResponse(user: userModel);
     } on FirebaseAuthException catch (e) {
       return AuthResponse(error: getErrorMessage(e));
-    } catch (e) {
+    } catch (_) {
       return AuthResponse(error: 'An unexpected error occurred. Please try again.');
     }
   }
 
-  // Google Sign In
   Future<AuthResponse> signInWithGoogle() async {
     try {
-      // Trigger Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         return AuthResponse(error: 'Google sign in cancelled');
       }
 
-      // Obtain auth details
       final GoogleSignInAuthentication googleAuth =
       await googleUser.authentication;
 
-      // Create credential using OAuth
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Sign in with credential
       final UserCredential userCredential =
       await _auth.signInWithCredential(credential);
 
-      // Split name for first/last name
       final names = googleUser.displayName?.split(' ') ?? ['', ''];
       final userModel = UserModel(
         id: userCredential.user!.uid,
@@ -169,34 +152,43 @@ class AuthService {
         surname: names.length > 1 ? names.sublist(1).join(' ') : '',
         email: googleUser.email,
         photoUrl: googleUser.photoUrl ?? userCredential.user!.photoURL,
-        createdAt: DateTime.now(),
         lastLogin: DateTime.now(),
       );
 
-      // Create or update user document
       await _createUserDocument(userModel);
 
       return AuthResponse(user: userModel);
     } on FirebaseAuthException catch (e) {
       return AuthResponse(error: getErrorMessage(e));
-    } catch (e) {
+    } catch (_) {
       return AuthResponse(error: 'Google sign in failed. Please try again.');
     }
   }
 
-  // Password Reset
   Future<AuthResponse> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-      return AuthResponse();
+      return AuthResponse(); // Başarılı durum
     } on FirebaseAuthException catch (e) {
-      return AuthResponse(error: getErrorMessage(e));
-    } catch (e) {
+      return AuthResponse(error: _getErrorMessage(e));
+    } catch (_) {
       return AuthResponse(error: 'Failed to send reset email. Please try again.');
     }
   }
 
-  // Sign Out
+  String _getErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'No user found with this email address.';
+      case 'invalid-email':
+        return 'The email address is not valid.';
+      case 'too-many-requests':
+        return 'Too many requests. Please try again later.';
+      default:
+        return e.message ?? 'An unknown error occurred.';
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await Future.wait([
@@ -208,16 +200,13 @@ class AuthService {
     }
   }
 
-  // Get current user
   Future<UserModel?> getCurrentUser() async {
     final user = _auth.currentUser;
     if (user == null) return null;
 
-    // Get the most up-to-date user data
     await user.reload();
     final refreshedUser = _auth.currentUser;
 
-    // Check Firestore for additional data
     final doc = await _firestore.collection('users').doc(refreshedUser?.uid).get();
     if (doc.exists) {
       return UserModel.fromMap(doc.data()!);
@@ -225,15 +214,19 @@ class AuthService {
     return _userFromFirebase(refreshedUser);
   }
 
-  // Create/Update user document in Firestore
   Future<void> _createUserDocument(UserModel user) async {
-    await _firestore.collection('users').doc(user.id).set(
-      user.toMap(),
-      SetOptions(merge: true),
-    );
+    final userRef = _firestore.collection('users').doc(user.id);
+    final existing = await userRef.get();
+
+    final data = user.toMap();
+    if (!existing.exists) {
+      data['createdAt'] = DateTime.now().toIso8601String();
+    }
+    data['lastLogin'] = DateTime.now().toIso8601String();
+
+    await userRef.set(data, SetOptions(merge: true));
   }
 
-  // Update user profile
   Future<AuthResponse> updateProfile({
     String? name,
     String? surname,
@@ -245,14 +238,12 @@ class AuthService {
         return AuthResponse(error: 'No user logged in');
       }
 
-      // Update Firebase Auth profile
       if (name != null || surname != null) {
         final displayName = '${name ?? ''} ${surname ?? ''}'.trim();
         await user.updateDisplayName(displayName);
         await user.reload();
       }
 
-      // Update Firestore document
       final updates = <String, dynamic>{};
       if (name != null) updates['name'] = name;
       if (surname != null) updates['surname'] = surname;
@@ -262,19 +253,18 @@ class AuthService {
         await _firestore.collection('users').doc(user.uid).update(updates);
       }
 
-      // Get updated user data
-      final updatedDoc = await _firestore.collection('users').doc(user.uid).get();
+      final updatedDoc =
+      await _firestore.collection('users').doc(user.uid).get();
       final updatedUser = UserModel.fromMap(updatedDoc.data()!);
 
       return AuthResponse(user: updatedUser);
     } on FirebaseAuthException catch (e) {
       return AuthResponse(error: getErrorMessage(e));
-    } catch (e) {
+    } catch (_) {
       return AuthResponse(error: 'Failed to update profile. Please try again.');
     }
   }
 
-  // Helper method to get user-friendly error messages
   String getErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':

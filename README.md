@@ -1,16 +1,27 @@
-# stylecv
+# StyleCV - CV Builder App
 
-A new Flutter project.
+StyleCV is a Flutter application designed to help users create modern and customizable resumes (CVs). After logging in, users can easily build and manage their professional CVs in PDF format.
+
+## Features
+
+- Firebase Authentication (e.g., Google Sign-In)
+- Create and edit resumes
+- Export CVs as PDF
+- Optional Flutter Web support
+- Clean and user-friendly interface
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK (version 3.x recommended)
+- A Firebase account
+- A suitable IDE (VS Code, Android Studio, etc.)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/MohamedAbdullaElfaituri/stylecv.git
+   cd stylecv

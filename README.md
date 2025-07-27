@@ -4,7 +4,7 @@
 
 StyleCV is a cutting-edge Flutter application that transforms resume building into a seamless, visually stunning experience with professional templates and intuitive design.
 
-## ✨ Key Features
+##  Key Features
 
 - **Modern UI/UX**  
   Elegant interface with your brand colors (#142831 primary, #1a936f accent)
@@ -21,7 +21,7 @@ StyleCV is a cutting-edge Flutter application that transforms resume building in
 - **PDF Export**  
   Generate and share professional PDF resumes
 
-## 📱 Screenshots
+##  Screenshots
 
 <div align="center">
   <img src="assets/screenshots/login.png" width="30%" alt="Login Screen">
@@ -29,7 +29,7 @@ StyleCV is a cutting-edge Flutter application that transforms resume building in
   <img src="assets/screenshots/preview.png" width="30%" alt="CV Preview">
 </div>
 
-## 🛠 Technical Architecture
+##  Technical Architecture
 
 ```mermaid
 graph TD

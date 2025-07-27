@@ -1,16 +1,41 @@
-# stylecv
+# StyleCV - Professional Resume Builder
 
-A new Flutter project.
+![StyleCV Banner](assets/logo.png) <!-- Using your actual banner asset -->
 
-## Getting Started
+StyleCV is a cutting-edge Flutter application that transforms resume building into a seamless, visually stunning experience with professional templates and intuitive design.
 
-This project is a starting point for a Flutter application.
+## ✨ Key Features
 
-A few resources to get you started if this is your first Flutter project:
+- **Modern UI/UX**  
+  Elegant interface with your brand colors (#142831 primary, #1a936f accent)
+  
+- **Dynamic Sections**  
+  Easily add/remove work experiences, education, and skills
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Cloud Sync**  
+  Firebase-backed data storage for access across devices
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Unique Animations**  
+  Custom portal-style transitions between screens
+
+- **PDF Export**  
+  Generate and share professional PDF resumes
+
+## 📱 Screenshots
+
+<div align="center">
+  <img src="assets/screenshots/login.png" width="30%" alt="Login Screen">
+  <img src="assets/screenshots/form.png" width="30%" alt="CV Form">
+  <img src="assets/screenshots/preview.png" width="30%" alt="CV Preview">
+</div>
+
+## 🛠 Technical Architecture
+
+```mermaid
+graph TD
+    A[Flutter UI] --> B[Firebase Auth]
+    A --> C[Firestore Database]
+    A --> D[Storage]
+    B --> E[User Management]
+    C --> F[CV Data]
+    D --> G[Profile Images]

@@ -138,7 +138,6 @@ class AuthService {
     }
   }
 
-  // Google Sign In
   Future<AuthResponse> signInWithGoogle() async {
     try {
       // Trigger Google Sign-In flow
@@ -148,8 +147,7 @@ class AuthService {
       }
 
       // Obtain auth details
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       // Create credential using OAuth
       final OAuthCredential credential = GoogleAuthProvider.credential(
@@ -158,13 +156,18 @@ class AuthService {
       );
 
       // Sign in with credential
-      final UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
 
-      // Split name for first/last name
+      final uid = userCredential.user!.uid;
+
+      // Firestore kontrolü
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+
+      bool isNewUser = !userDoc.exists;
+
       final names = googleUser.displayName?.split(' ') ?? ['', ''];
       final userModel = UserModel(
-        id: userCredential.user!.uid,
+        id: uid,
         name: names.first,
         surname: names.length > 1 ? names.sublist(1).join(' ') : '',
         email: googleUser.email,
@@ -173,16 +176,24 @@ class AuthService {
         lastLogin: DateTime.now(),
       );
 
-      // Create or update user document
-      await _createUserDocument(userModel);
+      // Firestore'da kayıt yoksa oluştur
+      if (isNewUser) {
+        await _createUserDocument(userModel);
+      } else {
+        // varsa sadece son giriş zamanını güncelle
+        await _firestore.collection('users').doc(uid).update({
+          'lastLogin': DateTime.now().toIso8601String(),
+        });
+      }
 
-      return AuthResponse(user: userModel);
+      return AuthResponse(user: userModel, isNewUser: isNewUser);
     } on FirebaseAuthException catch (e) {
       return AuthResponse(error: getErrorMessage(e));
     } catch (e) {
       return AuthResponse(error: 'Google sign in failed. Please try again.');
     }
   }
+
 
   // Password Reset
   Future<AuthResponse> sendPasswordResetEmail(String email) async {

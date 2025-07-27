@@ -22,7 +22,14 @@ class CVModel {
   String? github;
   String? website;
 
-  CVModel();
+  CVModel({
+    this.name,
+    this.email,
+    this.phone,
+    this.address,
+    this.profileImageUrl,
+    this.summary,
+});
 
   // Convert to Map for Firebase
   Map<String, dynamic> toMap() {

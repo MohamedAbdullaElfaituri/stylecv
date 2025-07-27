@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../controlls/email_control.dart';
 import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -91,15 +92,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         contentPadding: const EdgeInsets.symmetric(vertical: 15),
       ),
       keyboardType: TextInputType.emailAddress,
-      validator: _validateEmail,
+      validator: validateEmail,
     );
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return 'Please enter your email';
-    if (!value.contains('@')) return 'Please enter a valid email';
-    return null;
-  }
 
   Widget _buildResetButton(BuildContext context) {
     return ElevatedButton(

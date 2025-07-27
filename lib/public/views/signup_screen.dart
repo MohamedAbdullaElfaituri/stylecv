@@ -3,6 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../controlls/email_control.dart';
+import '../controlls/name_control.dart';
+import '../controlls/password_control.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -200,15 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             hintText: "Name",
                             icon: Icons.person,
                             context: context,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your name';
-                              }
-                              if (value.length < 2) {
-                                return 'Name must be at least 2 characters';
-                              }
-                              return null;
-                            },
+                            validator: validateName
                           ),
                           const SizedBox(height: 15),
                           _buildTextField(
@@ -230,15 +226,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             icon: Icons.email,
                             context: context,
                             keyboardType: TextInputType.emailAddress,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your email';
-                              }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                return 'Please enter a valid email';
-                              }
-                              return null;
-                            },
+                            validator: validateEmail
                           ),
                           const SizedBox(height: 15),
                           _buildPasswordField(
@@ -246,15 +234,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             hintText: "Password",
                             icon: Icons.vpn_key,
                             context: context,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
-                              return null;
-                            },
+                            validator: validatePassword
                           ),
                           const SizedBox(height: 25),
                           SizedBox(

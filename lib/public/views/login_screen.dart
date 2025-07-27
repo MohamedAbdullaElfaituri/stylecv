@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../controlls/email_control.dart';
+import '../controlls/password_control.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -169,31 +172,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       icon: Icons.email,
                                       context: context,
                                       keyboardType: TextInputType.emailAddress,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter your email';
-                                        }
-                                        if (!value.contains('@')) {
-                                          return 'Please enter a valid email';
-                                        }
-                                        return null;
-                                      },
+                                      validator: validateEmail,
                                     ),
+
                                     const SizedBox(height: 20),
                                     _buildPasswordField(
                                       controller: _passwordController,
                                       hintText: "Password",
                                       icon: Icons.vpn_key,
                                       context: context,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter your password';
-                                        }
-                                        if (value.length < 6) {
-                                          return 'Password must be at least 6 characters';
-                                        }
-                                        return null;
-                                      },
+                                      validator: validatePassword,
                                     ),
                                     const SizedBox(height: 30),
                                     SizedBox(

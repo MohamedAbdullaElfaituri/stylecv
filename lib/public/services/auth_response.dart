@@ -6,11 +6,13 @@ class AuthResponse {
   final UserModel? user;
   final String? token;
   final String? error;
+  final bool? isNewUser;
 
   AuthResponse({
     this.user,
     this.token,
     this.error,
+    this.isNewUser = false,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
